@@ -2,11 +2,11 @@
 
 Decoupled, dynamic and type-safe Messaging System for Unity3D
 
-v0.9Beta - Jan 20th, 2017
+v0.9Beta - Jan 20th, 2017 - new version's public release
 
-Disclaimer: This is a Beta release. All intended functionality is in place and basic testing was performed, but no guarantees are provided about its functionality - so use it at your own risk. At the same time, by using it and reporting bugs you'll help me shaping this up to be the best Unity messaging system.
+`Disclaimer: This is a Beta release. All intended functionality is in place and basic testing was performed, but no guarantees are provided about its functionality - so use it at your own risk. At the same time, by using it and reporting bugs you'll help me shaping this up to be the best Unity messaging system.`
 
-Version: 0.9, new version's public release.
+# E-Z What? 
 
 EzMsg (pronounced "Easy Message") is a decoupled, dynamic, type-safe Messaging System for the Unity3D game engine (www.unity3d.com). 
 
@@ -16,17 +16,17 @@ EzMsg is interface-based, so it allows you to send messages and requests to meth
 
 # Why shouldn't I use another Messaging system? 
 
-There are two forms of messaging, static and dynamic. If you check UnityEvents you'll notice there's a dropdown where you can define how you want it to behave. *Static* refers to messaging targetting editor-defined elements in your scene, eg.: a GameManager sending a message to the Player or an NPC ship warning the GameManager that it was destroyed. This target exists before the game runs, so it's trivial to find its reference*. If all you want is this kind of messaging in code, you can use native C# events or an existing 'observer pattern' helper framework - I recommend Will Miller's: http://www.willrmiller.com/?p=87
+There are two forms of messaging, static and dynamic. If you check UnityEvents you'll notice there's a dropdown where you can define how you want it to behave. *Static* refers to messaging targeting editor-defined elements in your scene, eg.: a GameManager sending a message to the Player or an NPC ship warning the GameManager that it was destroyed. This target exists before the game runs, so it's trivial to find its reference (more on that later). If all you want is this kind of messaging in code, you can use native C# events or an existing 'observer pattern' helper framework - I recommend Will Miller's: http://www.willrmiller.com/?p=87
 
-Now, what should you do when you want to send a message *to the NPC ship*? It didn't exist in editor-time, since it was instantiated (spawned) during the game. The standard Unity approach would be, after getting the NPC GameObject reference from a native Unity callback, usually "OnTriggerEnter", to get a hold of its target component and execute a method there. Something like "gameObjectHit.GetComponent<Armor>().ApplyDamage(damage);"
+Now, what should you do when you want to send a message *to the NPC ship*? It didn't exist in editor-time, since it was instantiated (spawned) during the game. The standard Unity approach would be, after getting the NPC GameObject reference from a native Unity callback, usually `OnTriggerEnter`, to get a hold of its target component and execute a method there. Something like `gameObjectHit.GetComponent<Armor>().ApplyDamage(damage);`
 
-The problem is: you've just had to deal with the Armor class' inner structure. Your code is no longer decoupled. "Why is that important?", you might guess. Without turning this into a long essay defending 'decouping' (there are many online), let's just say it's way more reusable and convenient to just call methods defined in an Interface. First because a message may or may not be consumed by the receiver, it won't break your game (due to a Null Reference error) in any case, minimizing the need for error handling. Second because when you may have a component with multiple interfaces defined and it'll still take that message. For instance, you could have a component like this:
+The problem is: you've just had to deal with the Armor class' inner structure. Your code is no longer decoupled. "Why is that important?", you might guess. Without turning this into a long essay defending 'decoupling' (there are many online), let's just say it's way more reusable and convenient to just call methods defined in an Interface. First because a message may or may not be consumed by the receiver, it won't break your game (due to a Null Reference error) in any case, minimizing the need for error handling. Second because when you may have a component with multiple interfaces defined and it'll still take that message. For instance, you could have a component like this:
 
 	public class Vessel: MonoBehaviour, IArmor, ISpell {}
 
 This will take all the messages defined in IArmor and ISpell. You could have multiple components mixing and matching interfaces as needed. Abstract classes aren't as flexible, you can inherit from only one, so their concret classes aren't composable.
 
-		* Talking of references, make sure to learn about IoC frameworks. I recommend Syring (as a "let-me-try-this entry drug") and especially Zenject when you realize the advantages and are ready to get serious on the topic.
+	PS.: Talking of references, make sure to learn about IoC frameworks. I recommend Syring (as a "let-me-try-this entry drug") and especially Zenject when you realize the advantages and are ready to get serious on the topic.
 	
 	
 # Can I use EzMsg to send static messages?
@@ -44,11 +44,11 @@ In some circumstances you need to retrieve a value from a method, the decoupled 
 Methods which reply to a request may return any type in their interface signature, but since they don't return IEnumerable type these methods can't be paused or sequenced. Alternatively you can use a regular Send message with one or more of the called method's parameter using the 'out' modifier. Like so:
 
 		int health;
-	    EzMsg.Send<IArmor>(other.gameObject, _=>_.GetHealth(out health));
+		EzMsg.Send<IArmor>(other.gameObject, _=>_.GetHealth(out health));
 		
 # What's this _=>_ thing, is that a smiley?
 
-That's standard C#'s lambda notation. Lambdas define anonymous delegates, which are basically pointers to methods which also hold a state. The Lambda notation expresses that whatever's on the left side "goes to" whatever's at the right side, since you need an identifier to work with. More tipically you'll see things like `x=>x.method()`in examples online, but personally I feel any letter used adds "cognitive weight" to the instruction, in practice making it harder to read. An underscore makes it clear that it has no meaning inside the call. If the compiler allowed me to type only .method() instead I gladly would, but feel free to write armor=>armor.GetHealth(out health) or whatever other identifier you prefer.
+That's standard C#'s lambda notation. Lambdas define anonymous delegates, which are basically pointers to methods which also hold a state. The Lambda notation expresses that whatever's on the left side "goes to" whatever's at the right side, since you need an identifier to work with. More tipically you'll see things like `x=>x.method()`in examples online, but personally I feel any letter used adds "cognitive weight" to the instruction, in practice making it harder to read. An underscore makes it clear that it has no meaning inside the call. If the compiler allowed me to type only .method() instead I gladly would, but feel free to write `armor=>armor.GetHealth(out health)` or use whatever other identifier you prefer.
 
 # I don't like those lambda smiley thingies in my code, can I "hide" it somehow?
 
@@ -56,13 +56,13 @@ Yes, you can. Check the beginning of the included Projectile.cs script to learn 
 
 # How to use it?
 
-The easiest way to learn how to use EzMsg is by checking on the included EzMsg_tst scene, especially Projectile.cs and Armor.cs. For a new scene, take the follow steps:
+The easiest way to learn how to use EzMsg is by checking on the included EzMsg_tst scene, especially Projectile.cs and Armor.cs. For a new scene, take the following steps:
 
-	1. Add the EzMsgManager component to any existing GameObject in your scene (could be the Main Camera). This instance is required to host coroutines and keep track of the execution of multiple messages
-	2. Create a new C# class to define one or more receiving message's interfaces. The script must include System.Collections and UnityEngine.EventSystems, and each defined interface must implement IEventSystemHandler.
-	3. All method signatures defined in the interface must return type IEnumerable (and not Void), exception being methods to be called by EzMsg.Request
-	4. The MonoBehaviour script which will send messages must include Ez.Msg (add `using Ez.Msg;` at the top of the script) 
-	5. Now your script is ready to send a dynamic message from a certain interface type to another object. Make sure to add .Run() at the end of any Send command if you want it to execute immediately. Requests are always executed immediately.
+	(1) Add the EzMsgManager component to any existing GameObject in your scene (could be the Main Camera). This instance is required to host coroutines and keep track of the execution of multiple messages
+	(2) Create a new C# class to define one or more receiving message's interfaces. The script must include System.Collections and UnityEngine.EventSystems, and each defined interface must implement IEventSystemHandler.
+	(3) All method signatures defined in the interface must return type IEnumerable (and not Void), exception being methods to be called by EzMsg.Request
+	(4) The MonoBehaviour script which will send messages must include Ez.Msg (add `using Ez.Msg;` at the top of the script) 
+	(5) Now your script is ready to send a dynamic message from a certain interface type to another object. Make sure to add .Run() at the end of any Send command if you want it to execute immediately. Requests are always executed immediately.
 	
 # How can I sequence messages?
 
