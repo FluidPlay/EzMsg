@@ -84,3 +84,5 @@ Also, the fact that any method receiving a 'Send' message should return IEnumera
 For more examples, make sure to check the included demo scene and scripts.
 
 Enjoy!
+
+- Breno Azevedo (@brenoazevedo)
