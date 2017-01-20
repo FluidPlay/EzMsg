@@ -2,7 +2,8 @@
 
 Decoupled, dynamic and type-safe Messaging System for Unity3D
 
-v0.9Beta - Jan 20th, 2017 - new version's public release
+v0.91Beta - Jan20th, 2017 - Added compatibility to Unity 5.0 onwards
+v0.9Beta - Jan 20th, 2017 - New version's public release
 
 `Disclaimer: This is a Beta release. All intended functionality is in place and basic testing was performed, but no guarantees are provided about its functionality - so use it at your own risk. At the same time, by using it and reporting bugs you'll help me shaping this up to be the best Unity messaging system.`
 
@@ -26,7 +27,7 @@ The problem is: you've just had to deal with the Armor class' inner structure. Y
 
 This will take all the messages defined in IArmor and ISpell. You could have multiple components mixing and matching interfaces as needed. Abstract classes aren't as flexible, you can inherit from only one, so their concret classes aren't composable.
 
-	PS.: Talking of references, make sure to learn about IoC frameworks. I recommend Syring (as a "let-me-try-this entry drug") and especially Zenject when you realize the advantages and are ready to get serious on the topic.
+	PS.: Talking of references, make sure to learn about IoC frameworks. I recommend Syring (as a "let-me-try-this entry drug") and especially Zenject when you realize DI/IoC advantages and are ready to get serious on the topic.
 	
 	
 # Can I use EzMsg to send static messages?
@@ -41,10 +42,9 @@ In some circumstances you need to retrieve a value from a method, the decoupled 
 	    int h1 = EzMsg.Request<IArmor, int>(other.gameObject, _=>_.GetHealth());
 	    int h2 = other.gameObject.Request<IArmor, int>(_=>_.GetHealth());
 
-Methods which reply to a request may return any type in their interface signature, but since they don't return IEnumerable type these methods can't be paused or sequenced. Alternatively you can use a regular Send message with one or more of the called method's parameter using the 'out' modifier. Like so:
+Methods which reply to a request may return any type in their interface signature, but since they don't return an IEnumerable type these methods can't be paused or sequenced. Chain-able requests are in EzMsg’s wish list, but there are a number of design considerations to work out first. Meanwhile, if you really need chain-able requests you may try sending an Action to update a field in the caller method, using a feature called “closure”. You can read more about it here:
+http://stackoverflow.com/questions/999020/why-cant-iterator-methods-take-either-ref-or-out-parameters
 
-		int health;
-		EzMsg.Send<IArmor>(other.gameObject, _=>_.GetHealth(out health));
 		
 # What's this _=>_ thing, is that a smiley?
 
@@ -86,3 +86,4 @@ For more examples, make sure to check the included demo scene and scripts.
 Enjoy!
 
 - Breno Azevedo (@brenoazevedo)
+@FluidPlay

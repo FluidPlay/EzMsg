@@ -51,8 +51,7 @@ public class Projectile : MonoBehaviour {
 //	    EzMsg.Send<IArmor>(other.gameObject, _=>_.ApplyDamage(Damage)).Run();
 //	    other.gameObject.Send<IArmor>(_=>_.ApplyDamage(Damage));
 
-
-	    // Note: Currently, a EzMsgManager component scene is required in the scene to hold the multiple coroutines.
+	    // Note: Currently, a EzMsgManager component is required in the scene to hold the multiple coroutines.
 
 	    EzMsg.Send<IArmor>(other.gameObject, _=>_.ApplyDamage(Damage))
 	        .Wait(2f)
