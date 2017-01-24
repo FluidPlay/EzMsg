@@ -21,57 +21,6 @@ namespace Ez.Msg
 //		}
 //	}
 
-        /// <summary> [Obsolete, use Send] Sends the EventAction of type T to the target gameObject. Eg.:
-        /// EzMsg.Send<IArmor>(col, _=>_.ApplyDamage);
-        /// </summary>
-        public static void SendSimple<T>(GameObject target,
-            EventAction<T> functor, bool sendToChildren = false)
-            where T : IEventSystemHandler
-        {
-            Execute(target, functor);
-
-            if (target.transform.childCount == 0 || !sendToChildren)
-                return;
-
-            //true = include inactive
-            foreach (Transform child in target.GetComponentsInChildren<Transform>(true)) {
-                Execute(child.gameObject, functor);
-            }
-        }
-
-        /// <summary>
-        /// Counterpart to Send, returning the first response from a given target, interface and Functor. Eg.:
-        /// var curState = EzMsg.Request<IFSM, FSMState>(gameObject, (x,y) => x.GetCurrentState());
-        /// </summary>
-        /// <param name="target">Target GameObject</param>
-        /// <param name="functor">Method to call, must return a T2 type</param>
-        /// <param name="requestToChildren">Should the request be sent to children of target?</param>
-        /// <typeparam name="T1">Required interface which should be implemented in a matching component</typeparam>
-        /// <typeparam name="T2">Required method return type</typeparam>
-        /// <returns>Response to Request, T2 type</returns>
-        public static T2 Request<T1,T2>(GameObject target,
-            EventFunc<T1,T2> functor, bool requestToChildren = true)
-            where T1 : IEventSystemHandler
-        {
-            var requestValue = Request(target, null, functor);
-            //Debug.Log("Request Value: "+requestValue);
-
-            // if (requestValue != default (T2) won' work, unconstrained type comparison
-            if (!IsGenericNull(requestValue)
-                || target.transform.childCount == 0
-                || !requestToChildren)
-                return requestValue;
-
-            //GetComponentsInChildren(true) = include inactive
-            foreach (Transform child in target.GetComponentsInChildren<Transform>(false)) {
-                var res = Request(child.gameObject, functor);
-                if (IsGenericNull(res))
-                    continue;
-                return res;
-            }
-            return default(T2);
-        }
-
         private static MonoBehaviour _manager;
         /// <summary> Singleton used to hold all coroutines used by EzMsg</summary>
         public static MonoBehaviour Manager {
@@ -80,8 +29,10 @@ namespace Ez.Msg
                 if (_manager == null)
                     _manager = Object.FindObjectOfType<EzMsgManager>();
                 if (_manager == null)
-                    Debug.LogError("EzMsgManager component not found in Scene. Please rectify.");
-
+                {
+                    var newGO = new GameObject() {name = "_EzMsgManager"};
+                    _manager = newGO.AddComponent<EzMsgManager>();
+                    Debug.LogWarning("EzMsgManager component wasn't found in Scene, created dynamically.");}
                 return _manager;
             }
             set { _manager = value; }
@@ -124,6 +75,10 @@ namespace Ez.Msg
 
         #region #Region SendSeqData Extension Methods
 
+        /// <summary> [Extension] Wait the given amount of seconds before proceeding the Sequence Data </summary>
+        /// <param name="sendSeqData"></param>
+        /// <param name="waitTime">Time to wait, in seconds</param>
+        /// <param name="realtime">Ignores Time.TimeScale</param>
         public static SendSeqData Wait(this SendSeqData sendSeqData, float waitTime, bool realtime = false)
         {
             return Wait(waitTime, realtime, sendSeqData);
@@ -142,37 +97,37 @@ namespace Ez.Msg
 
         #endregion << SendSeqData Extension Methods
 
-        public static SendSeqData Wait(float waitTime, bool realtime = false, SendSeqData sendSeqData = null)
+        /// <summary>
+        /// Non-chainable counterpart to Send, returning the first response from a given target, interface and Functor.
+        /// Eg.: var curState = EzMsg.Request<IFSM, FSMState>(gameObject, (x,y) => x.GetCurrentState());
+        /// </summary>
+        /// <param name="target">Target GameObject</param>
+        /// <param name="functor">Method to call, must return a T2 type</param>
+        /// <param name="requestToChildren">Should the request be sent to children of target?</param>
+        /// <param name="responseCheck">Should each request check for a non-null response? Use nullable types with this.</param>
+        /// <typeparam name="T1">Required interface which should be implemented in a matching component</typeparam>
+        /// <typeparam name="T2">Required method return type</typeparam>
+        /// <returns>Response to Request, T2 type</returns>
+        public static T2 Request<T1,T2>(GameObject target, EventFunc<T1, T2> functor, bool requestToChildren = true)
+            where T1 : IEventSystemHandler
         {
-            if (sendSeqData == null)
-                sendSeqData = new SendSeqData();
+            var response = Request(target, null, functor);
 
-            sendSeqData.Coroutines.Add(WaitCoroutine(waitTime, realtime));
-            return sendSeqData;
+            if (!IsGenericNull(response) || target.transform.childCount == 0 || !requestToChildren)
+                return response;
+
+            // GetComponentsInChildren(false) = exclude inactive
+            foreach (Transform child in target.GetComponentsInChildren<Transform>(false))
+            {
+                // Skips `target` so it isn't requested twice
+                if (child == target.transform)
+                    continue;
+                response = Request(child.gameObject, null, functor);
+                if (!IsGenericNull(response))
+                    return response;
+            }
+            return response;
         }
-
-        private static IEnumerable WaitCoroutine(float waitTime, bool realtime = false)
-        {
-            if (realtime)
-                yield return new WaitForSecondsRealtime(waitTime);
-            else
-                yield return new WaitForSeconds(waitTime);
-        }
-
-        //     ### Variation with C# 'Timers'
-//        var startTime = realtime ? Time.realtimeSinceStartup : Time.time;
-//        yield return new WaitWhile(() => Time.time < startTime + waitTime );
-//        var timer = new Timer(delay);
-//        timer.Elapsed += (_, __) =>
-//        {
-//            Debug.Log("Sending message to " + typeof(T) + " after " + delay / 1000 + " s.");
-//            // Fire Event
-//            //ExecuteRecursive(target, functor, sendToChildren, sendSeqData);
-//            callbackAction.SafeInvoke();
-//            timer.Stop();
-//            timer.Dispose();
-//        };
-//        timer.Start();
 
         /// <summary> Send EzMsg with Timer/Chaining capability. Eg.:
         /// EzMsg.Send<IArmor>(col, _=>_.ApplyDamage, true)
@@ -190,6 +145,54 @@ namespace Ez.Msg
             return sendSeqData;
         }
 
+        public static SendSeqData Wait(float waitTime, bool realtime = false, SendSeqData sendSeqData = null)
+        {
+            if (sendSeqData == null)
+                sendSeqData = new SendSeqData();
+
+            sendSeqData.Coroutines.Add(WaitCoroutine(waitTime, realtime));
+            return sendSeqData;
+        }
+
+        private static IEnumerable WaitCoroutine(float waitTime, bool realtime = false)
+        {
+              #if UNITY_5_4_OR_NEWER
+//            if (realtime)
+//                yield return new WaitForSecondsRealtime(waitTime);
+//            else
+              #endif
+                yield return new WaitForSeconds(waitTime);
+        }
+
+        //     ### Variation with C# 'Timers'
+
+//        var startTime = realtime ? Time.realtimeSinceStartup : Time.time;
+
+//        yield return new WaitWhile(() => Time.time < startTime + waitTime );
+
+//        var timer = new Timer(delay);
+
+//        timer.Elapsed += (_, __) =>
+
+//        {
+
+//            Debug.Log("Sending message to " + typeof(T) + " after " + delay / 1000 + " s.");
+
+//            // Fire Event
+
+//            //ExecuteRecursive(target, functor, sendToChildren, sendSeqData);
+
+//            callbackAction.SafeInvoke();
+
+//            timer.Stop();
+
+//            timer.Dispose();
+
+//        };
+
+//        timer.Start();
+
+
         public static IEnumerable ExecuteRecursive<T>(GameObject target, EventAction<T> functor,
             bool sendToChildren = false)
             where T : IEventSystemHandler
@@ -199,9 +202,12 @@ namespace Ez.Msg
             if (target.transform.childCount == 0 || !sendToChildren)
                 yield break;
 
-            //true = include inactive
             // Will wait for the logic completion of all valid targets in the target's hierarchy
-            foreach (Transform child in target.GetComponentsInChildren<Transform>(true)) {
+            // (false) = don't include inactive
+            foreach (Transform child in target.GetComponentsInChildren<Transform>(false)) {
+                // Skips `target` so it isn't requested twice
+                if (child == target.transform)
+                    continue;
                 yield return Manager.StartCoroutine(Manager.ExecuteSeq(child.gameObject, functor).GetEnumerator());
             }
         }
@@ -227,23 +233,20 @@ namespace Ez.Msg
                     continue;
                 }
 
-//            try
-//            {
-                //TODO: Check this out
+                if (arg == null || functor == null)
+                {
+                    Debug.LogError("EzMsg: Signature Type Incompatible or Functor not assigned");
+                    yield break;
+                }
                 yield return mb.StartCoroutine(functor(arg).GetEnumerator());
-//            }
-//            catch (Exception e)
-//            {
-//                Debug.LogException(e);
-//            }
             }
 
-//        var handlerCount = internalHandlers.Count;
-//        s_HandlerListPool.Release(internalHandlers);
-//        return handlerCount > 0;
+            //        var handlerCount = internalHandlers.Count;
+            //        s_HandlerListPool.Release(internalHandlers);
+            //        return handlerCount > 0;
         }
 
-        /// <summary>Generic-compatible version ofthe equality operator (==)</summary>
+        /// <summary>Generic-compatible version of the equality operator (==)</summary>
         /// <param name="requestValue"></param>
         /// <typeparam name="T2"></typeparam>
         /// <returns></returns>
@@ -252,7 +255,7 @@ namespace Ez.Msg
             return EqualityComparer<T2>.Default.Equals(requestValue, default(T2));
         }
 
-        #region ############# Additions to original ExecuteEvents ##############
+        #region #Region ##### Additions to original ExecuteEvents #####
         /// Adapted from //https://github.com/tenpn/unity3d-ui/blob/master/UnityEngine.UI/EventSystem/ExecuteEvents.cs
 
         public delegate IEnumerable EventAction<T1>(T1 handler);
@@ -327,7 +330,7 @@ namespace Ez.Msg
         /// <typeparam name="T1">Functor type</typeparam>
         /// <typeparam name="T2">Return Type</typeparam>
         /// <returns></returns>
-        public static T2 Request<T1,T2>(GameObject target, BaseEventData eventData, EventFunc<T1,T2> functor)
+        public static T2 Request<T1,T2>(GameObject target, EventArgs eventData, EventFunc<T1,T2> functor)
             where T1 : IEventSystemHandler
         {
             var internalHandlers = s_HandlerListPool.Get();
@@ -355,6 +358,11 @@ namespace Ez.Msg
 
                 try
                 {
+                    if (arg == null || functor == null)
+                    {
+                        Debug.LogError("EzMsg: Signature Type Incompatible or Functor not assigned");
+                        return returnValue;
+                    }
                     returnValue = functor(arg);
                 }
                 catch (Exception e)

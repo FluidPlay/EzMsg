@@ -46,9 +46,9 @@ Methods which reply to a request may return any type in their interface signatur
 http://stackoverflow.com/questions/999020/why-cant-iterator-methods-take-either-ref-or-out-parameters
 
 		
-# What's this _=>_ thing, is that a smiley?
+# What's this `_=>_` thing, is that a smiley?
 
-That's standard C#'s lambda notation. Lambdas define anonymous delegates, which are basically pointers to methods which also hold a state. The Lambda notation expresses that whatever's on the left side "goes to" whatever's at the right side, since you need an identifier to work with. More tipically you'll see things like `x=>x.method()`in examples online, but personally I feel any letter used adds "cognitive weight" to the instruction, in practice making it harder to read. An underscore makes it clear that it has no meaning inside the call. If the compiler allowed me to type only .method() instead I gladly would, but feel free to write `armor=>armor.GetHealth(out health)` or use whatever other identifier you prefer.
+That's standard C#'s lambda notation. Lambdas define anonymous delegates, which are basically pointers to methods which also hold a state. The Lambda notation expresses that whatever's on the left side "goes to" whatever's at the right side, since you need an identifier to work with. More tipically you'll see things like `x=>x.method()`in examples online, but personally I feel any letter used before a one-liner method call on a class already defined by generics doesn’t add any meaning. It’s like not using ‘var’ to infer the type of what’s an obvious type at the right of the equal sign. It doesn’t add any additional meaning, it adds "cognitive weight" to the instruction instead, in practice making it harder to read. An underscore in these cases makes it clear that it’s “bypassing” the Generics type (what’s between < and >). There’s no absolute right or wrong here, since the compiler will gladly accept any valid parameter identifier, so free to write `armor=>armor.GetHealth()` or whatever other format you prefer.
 
 # I don't like those lambda smiley thingies in my code, can I "hide" it somehow?
 
@@ -58,11 +58,19 @@ Yes, you can. Check the beginning of the included Projectile.cs script to learn 
 
 The easiest way to learn how to use EzMsg is by checking on the included EzMsg_tst scene, especially Projectile.cs and Armor.cs. For a new scene, take the following steps:
 
-	(1) Add the EzMsgManager component to any existing GameObject in your scene (could be the Main Camera). This instance is required to host coroutines and keep track of the execution of multiple messages
+	(1) Add the EzMsgManager component to any existing GameObject in your scene (could be the Main Camera). This instance is required to host coroutines and keep track of the execution of multiple messages. If you don’t do this step, once a chained Send message is received by the system you’ll get a warning, yet an EzMsgManager game object and component will be added automatically to the scene. 
 	(2) Create a new C# class to define one or more receiving message's interfaces. The script must include System.Collections and UnityEngine.EventSystems, and each defined interface must implement IEventSystemHandler.
 	(3) All method signatures defined in the interface must return type IEnumerable (and not Void), exception being methods to be called by EzMsg.Request
 	(4) The MonoBehaviour script which will send messages must include Ez.Msg (add `using Ez.Msg;` at the top of the script) 
-	(5) Now your script is ready to send a dynamic message from a certain interface type to another object. Make sure to add .Run() at the end of any Send command if you want it to execute immediately. Requests are always executed immediately.
+	(5) Now your script is ready to send a dynamic message from a certain interface type to another object. Make sure to add .Run() at the end of a chained Send command if you want it to start being processed immediately. Requests are always executed immediately, just as the extension (shorthand) calls, and as such don’t require (and won’t admit) .Run() after them.
+
+# How do I send messages and requests to all children of a target GameObject?
+
+By default both Send and Request instructions are sent to the target game object first and, if applicable, to all its children. If that’s not what you want simply set the ‘sendToChildren’ final parameter in the calls to false.
+
+# Are messages sent to inactive GameObjects in a hierarchy?
+
+No, neither Send nor Requests are sent to inactive objects. There’s no parameter to override that, and I would advise against it, but if you really want it just search for “Include Inactive” in EzMsg.cs to change that behaviour.
 	
 # How can I sequence messages?
 

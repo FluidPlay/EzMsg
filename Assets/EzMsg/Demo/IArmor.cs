@@ -9,5 +9,9 @@ public interface IArmor : IEventSystemHandler
     IEnumerable IncreaseArmor(float Percentage);
 
     // Methods to be called by Request may return anything, but can't be chained or paused
-    int GetHealth();
+    int? GetHealth();
+
+    bool? IsDestructible();
+    bool IsDestructibleNonNullable();
+
 }
