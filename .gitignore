@@ -33,3 +33,10 @@ sysinfo.txt
 
 # Custom
 .idea/
+Assets/Plugins.meta
+Assets/Plugins/Editor.meta
+Assets/Plugins/Editor/JetBrains.meta
+Assets/Plugins/Editor/JetBrains/RiderAssetPostprocessor.cs
+Assets/Plugins/Editor/JetBrains/RiderAssetPostprocessor.cs.meta
+Assets/Plugins/Editor/JetBrains/RiderPlugin.cs
+Assets/Plugins/Editor/JetBrains/RiderPlugin.cs.meta

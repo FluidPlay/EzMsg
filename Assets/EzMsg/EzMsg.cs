@@ -199,7 +199,7 @@ namespace Ez.Msg
         {
             yield return Manager.StartCoroutine(Manager.ExecuteSeq(target, functor).GetEnumerator());
 
-            if (target.transform.childCount == 0 || !sendToChildren)
+            if (target == null || target.transform.childCount == 0 || !sendToChildren)
                 yield break;
 
             // Will wait for the logic completion of all valid targets in the target's hierarchy
@@ -330,7 +330,7 @@ namespace Ez.Msg
         /// <typeparam name="T1">Functor type</typeparam>
         /// <typeparam name="T2">Return Type</typeparam>
         /// <returns></returns>
-        public static T2 Request<T1,T2>(GameObject target, EventArgs eventData, EventFunc<T1,T2> functor)
+        public static T2 Request<T1,T2>(GameObject target, BaseEventData eventData, EventFunc<T1,T2> functor)
             where T1 : IEventSystemHandler
         {
             var internalHandlers = s_HandlerListPool.Get();
