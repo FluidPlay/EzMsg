@@ -2,8 +2,9 @@
 
 Decoupled, dynamic and type-safe Messaging System for Unity3D
 
-v0.91Beta - Jan20th, 2017 - Added compatibility to Unity 5.0 onwards
-v0.9Beta - Jan 20th, 2017 - New version's public release
+v0.92Beta - May 11, 2017 - Updated some example code, added Quickstart info to the readme
+v0.91Beta - Jan 20, 2017 - Added compatibility to Unity 5.0 onwards
+v0.9Beta - Jan 20, 2017 - New version's public release
 
 `Disclaimer: This is a Beta release. All intended functionality is in place and basic testing was performed, but no guarantees are provided about its functionality - so use it at your own risk. At the same time, by using it and reporting bugs you'll help me shaping this up to be the best Unity messaging system.`
 
@@ -27,12 +28,39 @@ The problem is: you've just had to deal with the Armor class' inner structure. Y
 
 This will take all the messages defined in IArmor and ISpell. You could have multiple components mixing and matching interfaces as needed. Abstract classes aren't as flexible, you can inherit from only one, so their concret classes aren't composable.
 
-	PS.: Talking of references, make sure to learn about IoC frameworks. I recommend Syring (as a "let-me-try-this entry drug") and especially Zenject when you realize DI/IoC advantages and are ready to get serious on the topic.
+	PS.: Talking of references, make sure to learn about Dependency Injection frameworks. I recommend Syring (as a "let-me-try-this" entry drug) and especially Zenject when you wrap your mind around DI/IoC advantages and are ready to get serious on the topic.
+		
+# Quick Start Guide (aka TL;DR)
+
+1. Create an interface with all methods of a certain type you want to run, make it implement IEventSystemHandler. All methods callable by a EzMsg should return IEnumerable. Eg.:
+
+	using System.Collections;
+	using UnityEngine.EventSystems;
+
+	public interface IWeapon: IEventSystemHandler 
+	{
+		IEnumerable Reload();
+		IEnumerable Fire();
+	}
 	
+	2. Implement the created interface in all classes you need to have that methods/event run. Remember classes may implement multiple interfaces without a problem. Eg.:
 	
+	public class Weapon: MonoBehaviour, IWeapon {
+		public IEnumerable Reload() { Debug.Log("Reload called"); yield return null; }
+		public IEnumerable Fire() { Debug.Log("Fire called"); yield return null; }		
+	}
+	
+	3. To fire the event on a target gameObject you may use the standard or shorthand notations:
+	3.1.	other.gameObject.Send<IArmor> (_=>_.ApplyDamage(Damage));	// This form doesn't allow pause or wait
+	3.2.	EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
+			 	 .wait(2f)	// Waits 2s after the ApplyDamage method is completed
+				 .Send<IWeapon>(gameObject, _=>_.Reload())	// then sends the reload message to my owner gameObject
+				 .Run();								// Fire immediately. Could be stored and ran later.
+
+
 # Can I use EzMsg to send static messages?
 
-Sure, just make your static component implement a specific message target interface and you're good to go. To make this even easier and way more reliable than by drag-and-dropping things in the Unity IDE, I recommend an IoC framework. I've done this short video showing how to set things up in Zenject: https://www.youtube.com/watch?v=uyN9KYvlgCQ
+Sure, just make your static component implement a specific message target interface and you're good to go. To make this even easier and way more reliable than by drag-and-dropping things in the Unity IDE, I recommend a DI framework. I've done this short video showing how to set things up in Zenject: https://www.youtube.com/watch?v=uyN9KYvlgCQ
 
 
 # I know what Sending a message means, but what's a request?
@@ -48,7 +76,7 @@ http://stackoverflow.com/questions/999020/why-cant-iterator-methods-take-either-
 		
 # What's this `_=>_` thing, is that a smiley?
 
-That's standard C#'s lambda notation. Lambdas define anonymous delegates, which are basically pointers to methods which also hold a state. The Lambda notation expresses that whatever's on the left side "goes to" whatever's at the right side, since you need an identifier to work with. More tipically you'll see things like `x=>x.method()`in examples online, but personally I feel any letter used before a one-liner method call on a class already defined by generics doesn’t add any meaning. It’s like not using ‘var’ to infer the type of what’s an obvious type at the right of the equal sign. It doesn’t add any additional meaning, it adds "cognitive weight" to the instruction instead, in practice making it harder to read. An underscore in these cases makes it clear that it’s “bypassing” the Generics type (what’s between < and >). There’s no absolute right or wrong here, since the compiler will gladly accept any valid parameter identifier, so free to write `armor=>armor.GetHealth()` or whatever other format you prefer.
+That's standard C#'s lambda notation. Lambdas define anonymous delegates, which are basically pointers to methods which also hold a state. The Lambda notation expresses that whatever's on the left side "goes to" whatever's at the right side, since you need an identifier to work with. More tipically you'll see things like `x=>x.method()`in examples online, but personally I feel any letter used before a one-liner method call on a class already defined by generics doesn’t add any meaning. It’s like not using ‘var’ to infer the type of what’s an obvious type at the right of the equal sign. Instead of clarifying, it adds "cognitive weight" to the instruction, in practice making it harder to read. An underscore in these cases makes it clear that it’s “bypassing” the Generics type already provided (what’s between < and >). There’s no absolute right or wrong here, since the compiler will gladly accept any valid parameter identifier, so free to write `armor=>armor.GetHealth()` or whatever other format you prefer.
 
 # I don't like those lambda smiley thingies in my code, can I "hide" it somehow?
 

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour, IWeapon {
@@ -9,8 +8,9 @@ public class Weapon : MonoBehaviour, IWeapon {
         yield return null;
     }
 
-    public void Fire()
+    public IEnumerable Fire()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Fire!");
+        yield return null;
     }
 }
