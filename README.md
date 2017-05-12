@@ -24,15 +24,17 @@ Now, what should you do when you want to send a message *to the NPC ship*? It di
 
 The problem is: you've just had to deal with the Armor class' inner structure. Your code is no longer decoupled. "Why is that important?", you might guess. Without turning this into a long essay defending 'decoupling' (there are many online), let's just say it's way more reusable and convenient to just call methods defined in an Interface. First because a message may or may not be consumed by the receiver, it won't break your game (due to a Null Reference error) in any case, minimizing the need for error handling. Second because when you may have a component with multiple interfaces defined and it'll still take that message. For instance, you could have a component like this:
 
+```c#
 	public class Vessel: MonoBehaviour, IArmor, ISpell {}
+```
 
 This will take all the messages defined in IArmor and ISpell. You could have multiple components mixing and matching interfaces as needed. Abstract classes aren't as flexible, you can inherit from only one, so their concret classes aren't composable.
 
-	PS.: Talking of references, make sure to learn about Dependency Injection frameworks. I recommend Syring (as a "let-me-try-this" entry drug) and especially Zenject when you wrap your mind around DI/IoC advantages and are ready to get serious on the topic.
+> PS.: Talking of references, make sure to learn about Dependency Injection frameworks. I recommend Syring (as a "let-me-try-this" entry drug) and especially Zenject when you wrap your mind around DI/IoC advantages and are ready to get serious on the topic.
 		
 # Quick Start Guide (aka TL;DR)
 
-1. Create an interface with all methods of a certain type you want to run, make it implement IEventSystemHandler. All methods callable by a EzMsg should return IEnumerable. Eg.:
+	1. Create an interface with all methods of a certain type you want to run, make it implement `IEventSystemHandler`. All methods callable by a EzMsg should return the `IEnumerable` type. Eg.:
 
 	```c#
 	using System.Collections;
@@ -55,11 +57,13 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 	```
 	
 	3. To fire the event on a target gameObject you may use the standard or shorthand notations:
-	3.1.	
+	
+	3.1. Shorthand	
 		```c#
 		other.gameObject.Send<IArmor> (_=>_.ApplyDamage(Damage));	// This form doesn't allow pause or wait
 		```
-	3.2.
+			
+	3.2. Standard
 		```c#
 		EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
 		 	 .wait(2f)	// Waits 2s after the ApplyDamage method is completed
