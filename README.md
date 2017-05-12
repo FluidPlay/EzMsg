@@ -66,9 +66,9 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
   * Standard
 ```c#
 	EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
-	 	 .wait(2f)									// Waits 2s after the ApplyDamage method is completed
+	 	 .wait(2f)					// Waits 2s after the ApplyDamage method is completed
 		 .Send<IWeapon>(gameObject, _=>_.Reload())	// then sends the reload message to my owner gameObject
-		 .Run();				// Fires immediately. Could be stored and ran later.
+		 .Run();					// Fires immediately. Could be stored and ran later.
 ```
 
 # Can I use EzMsg to send static messages?
