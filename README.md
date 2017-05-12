@@ -3,8 +3,11 @@
 Decoupled, dynamic and type-safe Messaging System for Unity3D
 
 `v0.92Beta - May 11, 2017 - Updated some example code, added Quickstart info to the readme`
+	
 `v0.91Beta - Jan 20, 2017 - Added compatibility to Unity 5.0 onwards`
+	
 `v0.9Beta - Jan 20, 2017 - New version's public release`
+	
 
 `Disclaimer: This is a Beta release. All intended functionality is in place and basic testing was performed, but no guarantees are provided about its functionality - so use it at your own risk. At the same time, by using it and reporting bugs you'll help me shaping this up to be the best Unity messaging system.`
 
