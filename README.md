@@ -42,7 +42,8 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 	{
 		IEnumerable Reload();
 		IEnumerable Fire();
-	}```
+	}
+	```
 	
 	2. Implement the created interface in all classes you need to have that methods/event run. Remember classes may implement multiple interfaces without a problem. Eg.:
 	
@@ -50,15 +51,21 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 	public class Weapon: MonoBehaviour, IWeapon {
 		public IEnumerable Reload() { Debug.Log("Reload called"); yield return null; }
 		public IEnumerable Fire() { Debug.Log("Fire called"); yield return null; }		
-	}````
+	}
+	```
 	
 	3. To fire the event on a target gameObject you may use the standard or shorthand notations:
-	3.1.	```c# other.gameObject.Send<IArmor> (_=>_.ApplyDamage(Damage));	// This form doesn't allow pause or wait```
-	3.2.	```c# EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
-			 	 .wait(2f)	// Waits 2s after the ApplyDamage method is completed
-				 .Send<IWeapon>(gameObject, _=>_.Reload())	// then sends the reload message to my owner gameObject
-				 .Run();								// Fires immediately. Could be stored and ran later.```
-
+	3.1.	
+		```c#
+		other.gameObject.Send<IArmor> (_=>_.ApplyDamage(Damage));	// This form doesn't allow pause or wait
+		```
+	3.2.
+		```c#
+		EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
+		 	 .wait(2f)	// Waits 2s after the ApplyDamage method is completed
+			 .Send<IWeapon>(gameObject, _=>_.Reload())	// then sends the reload message to my owner gameObject
+			 .Run();								// Fires immediately. Could be stored and ran later.
+		```
 
 # Can I use EzMsg to send static messages?
 
@@ -68,9 +75,10 @@ Sure, just make your static component implement a specific message target interf
 # I know what Sending a message means, but what's a request?
 
 In some circumstances you need to retrieve a value from a method, the decoupled way to do that is by sending the method a request. Follows usage examples, the first using the standard notation followed by the shorthand (GameObject extension) notation:
-
-	    int h1 = EzMsg.Request<IArmor, int>(other.gameObject, _=>_.GetHealth());
+		```c#
+		int h1 = EzMsg.Request<IArmor, int>(other.gameObject, _=>_.GetHealth());
 	    int h2 = other.gameObject.Request<IArmor, int>(_=>_.GetHealth());
+		```
 
 Methods which reply to a request may return any type in their interface signature, but since they don't return an IEnumerable type these methods can't be paused or sequenced. Chain-able requests are in EzMsg’s wish list, but there are a number of design considerations to work out first. Meanwhile, if you really need chain-able requests you may try sending an Action to update a field in the caller method, using a feature called “closure”. You can read more about it here:
 http://stackoverflow.com/questions/999020/why-cant-iterator-methods-take-either-ref-or-out-parameters
@@ -105,11 +113,12 @@ No, neither Send nor Requests are sent to inactive objects. There’s no paramet
 # How can I sequence messages?
 
 EzMsg was designed from the ground up to provide a natural, fluid coding style. Just "chain" your initial Send command by other 'Wait' or 'Send' commands. They will be executed in order, always waiting for the completion of the previous one. You may start with a `Wait` as well if you want, just bear in mind that only the starting `Send` might use the shorthand form. Eg.:
-
+		```c#
 	    other.gameObject.Send<IArmor>(_=>_.ApplyDamage(Damage))
 	        .Wait(2f)
 	        .Send<IWeapon>(gameObject, _=>_.Reload())
 	        .Run();
+		```		
 			
 Let's break down this instruction. We're asking EzMsg to send an 'ApplyDamage' message, taking the Damage parameter, to any appropriate receiver in other.gameObject. To be a valid receiver, the component should implement the IArmor interface, which has the `IEnumerable ApplyDamage(int);` signature defined. Once matched dynamically, the method is executed and *only after its completion* the execution flow returns to the original message instruction.
 
