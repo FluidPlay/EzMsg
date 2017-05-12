@@ -99,15 +99,15 @@ That's standard C#'s lambda notation. Lambdas define anonymous delegates, which 
 
 Yes, you can. Check the beginning of the included Projectile.cs script to learn how to store an EventAction (used by Send) and EventFunc (used by Request) as static fields or local properties. Personally I only use this approach when I'm gonna be calling the same message many times in the same script.
 
-## How to use it?
+## More details on usage?
 
 The easiest way to learn how to use EzMsg is by checking on the included EzMsg_tst scene, especially Projectile.cs and Armor.cs. For a new scene, take the following steps:
 
-	(1) Add the EzMsgManager component to any existing GameObject in your scene (could be the Main Camera). This instance is required to host coroutines and keep track of the execution of multiple messages. If you don’t do this step, once a chained Send message is received by the system you’ll get a warning, yet an EzMsgManager game object and component will be added automatically to the scene. 
-	(2) Create a new C# class to define one or more receiving message's interfaces. The script must include System.Collections and UnityEngine.EventSystems, and each defined interface must implement IEventSystemHandler.
-	(3) All method signatures defined in the interface must return type IEnumerable (and not Void), exception being methods to be called by EzMsg.Request
-	(4) The MonoBehaviour script which will send messages must include Ez.Msg (add `using Ez.Msg;` at the top of the script) 
-	(5) Now your script is ready to send a dynamic message from a certain interface type to another object. Make sure to add .Run() at the end of a chained Send command if you want it to start being processed immediately. Requests are always executed immediately, just as the extension (shorthand) calls, and as such don’t require (and won’t admit) .Run() after them.
+1. Add the EzMsgManager component to any existing GameObject in your scene (could be the Main Camera). This instance is required to host coroutines and keep track of the execution of multiple messages. If you don’t do this step, once a chained Send message is received by the system you’ll get a warning, yet an EzMsgManager game object and component will be added automatically to the scene. 
+2. Create a new C# class to define one or more receiving message's interfaces. The script must include System.Collections and UnityEngine.EventSystems, and each defined interface must implement IEventSystemHandler.
+3. All method signatures defined in the interface must return type IEnumerable (and not Void), exception being methods to be called by EzMsg.Request
+4. The MonoBehaviour script which will send messages must include Ez.Msg (add `using Ez.Msg;` at the top of the script) 
+5. Now your script is ready to send a dynamic message from a certain interface type to another object. Make sure to add .Run() at the end of a chained Send command if you want it to start being processed immediately. Requests are always executed immediately, just as the extension (shorthand) calls, and as such don’t require (and won’t admit) .Run() after them.
 
 ## How do I send messages and requests to all children of a target GameObject?
 
