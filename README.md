@@ -2,13 +2,13 @@
 
 Decoupled, dynamic and type-safe Messaging System for Unity3D
 
-v0.92Beta - May 11, 2017 - Updated some example code, added Quickstart info to the readme
-v0.91Beta - Jan 20, 2017 - Added compatibility to Unity 5.0 onwards
-v0.9Beta - Jan 20, 2017 - New version's public release
+`v0.92Beta - May 11, 2017 - Updated some example code, added Quickstart info to the readme`
+`v0.91Beta - Jan 20, 2017 - Added compatibility to Unity 5.0 onwards`
+`v0.9Beta - Jan 20, 2017 - New version's public release`
 
 `Disclaimer: This is a Beta release. All intended functionality is in place and basic testing was performed, but no guarantees are provided about its functionality - so use it at your own risk. At the same time, by using it and reporting bugs you'll help me shaping this up to be the best Unity messaging system.`
 
-# E-Z What? 
+## E-Z What? 
 
 EzMsg (pronounced "Easy Message") is a decoupled, dynamic, type-safe Messaging System for the Unity3D game engine (www.unity3d.com). 
 
@@ -16,7 +16,7 @@ It's based off the innards of Unity's native "ExecuteEvents", meaning it relies 
 
 EzMsg is interface-based, so it allows you to send messages and requests to methods defined in any interface implementing IEventSystemHandler. It supports fluid notation and command chaining/sequencing, so you have full and easy control of the sequence messages should follow and wait until their consumers are done take.
 
-# Why shouldn't I use another Messaging system? 
+## Why shouldn't I use another Messaging system? 
 
 There are two forms of messaging, static and dynamic. If you check UnityEvents you'll notice there's a dropdown where you can define how you want it to behave. *Static* refers to messaging targeting editor-defined elements in your scene, eg.: a GameManager sending a message to the Player or an NPC ship warning the GameManager that it was destroyed. This target exists before the game runs, so it's trivial to find its reference (more on that later). If all you want is this kind of messaging in code, you can use native C# events or an existing 'observer pattern' helper framework - I recommend Will Miller's: http://www.willrmiller.com/?p=87
 
@@ -32,7 +32,7 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 
 > PS.: Talking of references, make sure to learn about Dependency Injection frameworks. I recommend Syring (as a "let-me-try-this" entry drug) and especially Zenject when you wrap your mind around DI/IoC advantages and are ready to get serious on the topic.
 		
-# Quick Start Guide (aka TL;DR)
+## Quick Start Guide (aka TL;DR)
 
 1. Create an interface with all methods of a certain type you want to run, make it implement `IEventSystemHandler`. All methods callable by a EzMsg should return the `IEnumerable` type. Eg.:
 
@@ -71,12 +71,12 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 		 .Run();					// Fires immediately. Could be stored and ran later.
 ```
 
-# Can I use EzMsg to send static messages?
+## Can I use EzMsg to send static messages?
 
 Sure, just make your static component implement a specific message target interface and you're good to go. To make this even easier and way more reliable than by drag-and-dropping things in the Unity IDE, I recommend a DI framework. I've done this short video showing how to set things up in Zenject: https://www.youtube.com/watch?v=uyN9KYvlgCQ
 
 
-# I know what Sending a message means, but what's a request?
+## I know what Sending a message means, but what's a request?
 
 In some circumstances you need to retrieve a value from a method, the decoupled way to do that is by sending the method a request. Follows usage examples, the first using the standard notation followed by the shorthand (GameObject extension) notation:
 		```c#
@@ -88,15 +88,15 @@ Methods which reply to a request may return any type in their interface signatur
 http://stackoverflow.com/questions/999020/why-cant-iterator-methods-take-either-ref-or-out-parameters
 
 		
-# What's this `_=>_` thing, is that a smiley?
+## What's this `_=>_` thing, is that a smiley?
 
 That's standard C#'s lambda notation. Lambdas define anonymous delegates, which are basically pointers to methods which also hold a state. The Lambda notation expresses that whatever's on the left side "goes to" whatever's at the right side, since you need an identifier to work with. More tipically you'll see things like `x=>x.method()`in examples online, but personally I feel any letter used before a one-liner method call on a class already defined by generics doesn’t add any meaning. It’s like not using ‘var’ to infer the type of what’s an obvious type at the right of the equal sign. Instead of clarifying, it adds "cognitive weight" to the instruction, in practice making it harder to read. An underscore in these cases makes it clear that it’s “bypassing” the Generics type already provided (what’s between < and >). There’s no absolute right or wrong here, since the compiler will gladly accept any valid parameter identifier, so free to write `armor=>armor.GetHealth()` or whatever other format you prefer.
 
-# I don't like those lambda smiley thingies in my code, can I "hide" it somehow?
+## I don't like those lambda smiley thingies in my code, can I "hide" it somehow?
 
 Yes, you can. Check the beginning of the included Projectile.cs script to learn how to store an EventAction (used by Send) and EventFunc (used by Request) as static fields or local properties. Personally I only use this approach when I'm gonna be calling the same message many times in the same script.
 
-# How to use it?
+## How to use it?
 
 The easiest way to learn how to use EzMsg is by checking on the included EzMsg_tst scene, especially Projectile.cs and Armor.cs. For a new scene, take the following steps:
 
@@ -106,15 +106,15 @@ The easiest way to learn how to use EzMsg is by checking on the included EzMsg_t
 	(4) The MonoBehaviour script which will send messages must include Ez.Msg (add `using Ez.Msg;` at the top of the script) 
 	(5) Now your script is ready to send a dynamic message from a certain interface type to another object. Make sure to add .Run() at the end of a chained Send command if you want it to start being processed immediately. Requests are always executed immediately, just as the extension (shorthand) calls, and as such don’t require (and won’t admit) .Run() after them.
 
-# How do I send messages and requests to all children of a target GameObject?
+## How do I send messages and requests to all children of a target GameObject?
 
 By default both Send and Request instructions are sent to the target game object first and, if applicable, to all its children. If that’s not what you want simply set the ‘sendToChildren’ final parameter in the calls to false.
 
-# Are messages sent to inactive GameObjects in a hierarchy?
+## Are messages sent to inactive GameObjects in a hierarchy?
 
 No, neither Send nor Requests are sent to inactive objects. There’s no parameter to override that, and I would advise against it, but if you really want it just search for “Include Inactive” in EzMsg.cs to change that behaviour.
 	
-# How can I sequence messages?
+## How can I sequence messages?
 
 EzMsg was designed from the ground up to provide a natural, fluid coding style. Just "chain" your initial Send command by other 'Wait' or 'Send' commands. They will be executed in order, always waiting for the completion of the previous one. You may start with a `Wait` as well if you want, just bear in mind that only the starting `Send` might use the shorthand form. Eg.:
 		```c#
