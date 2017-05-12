@@ -34,6 +34,7 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 
 1. Create an interface with all methods of a certain type you want to run, make it implement IEventSystemHandler. All methods callable by a EzMsg should return IEnumerable. Eg.:
 
+	```c#
 	using System.Collections;
 	using UnityEngine.EventSystems;
 
@@ -41,21 +42,22 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 	{
 		IEnumerable Reload();
 		IEnumerable Fire();
-	}
+	}```
 	
 	2. Implement the created interface in all classes you need to have that methods/event run. Remember classes may implement multiple interfaces without a problem. Eg.:
 	
+	```c#
 	public class Weapon: MonoBehaviour, IWeapon {
 		public IEnumerable Reload() { Debug.Log("Reload called"); yield return null; }
 		public IEnumerable Fire() { Debug.Log("Fire called"); yield return null; }		
-	}
+	}````
 	
 	3. To fire the event on a target gameObject you may use the standard or shorthand notations:
-	3.1.	other.gameObject.Send<IArmor> (_=>_.ApplyDamage(Damage));	// This form doesn't allow pause or wait
-	3.2.	EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
+	3.1.	```c# other.gameObject.Send<IArmor> (_=>_.ApplyDamage(Damage));	// This form doesn't allow pause or wait```
+	3.2.	```c# EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
 			 	 .wait(2f)	// Waits 2s after the ApplyDamage method is completed
 				 .Send<IWeapon>(gameObject, _=>_.Reload())	// then sends the reload message to my owner gameObject
-				 .Run();								// Fire immediately. Could be stored and ran later.
+				 .Run();								// Fires immediately. Could be stored and ran later.```
 
 
 # Can I use EzMsg to send static messages?
