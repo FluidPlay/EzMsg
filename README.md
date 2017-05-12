@@ -58,12 +58,12 @@ This will take all the messages defined in IArmor and ISpell. You could have mul
 	
 3. To fire the event on a target gameObject you may use the standard or shorthand notations:
 	
-  1. Shorthand	
+  * Shorthand	
 ```c#
 	other.gameObject.Send<IArmor> (_=>_.ApplyDamage(Damage));	// This form doesn't allow pause or wait
 ```
 			
-  2. Standard
+  * Standard
 ```c#
 	EzMsg.Send<IArmor> (other.gameObject, _=>_.ApplyDamage(Damage))
 	 	 .wait(2f)									// Waits 2s after the ApplyDamage method is completed
