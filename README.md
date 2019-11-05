@@ -17,7 +17,7 @@ EzMsg (pronounced "Easy Message") is a decoupled, dynamic, type-safe Messaging S
 
 It's based off the innards of Unity's native "ExecuteEvents", meaning it relies on native data types and systems as much as possible, while adding a layer of abstraction and simplification.
 
-EzMsg is interface-based, so it allows you to send messages and requests to methods defined in any interface implementing IEventSystemHandler. It supports fluid notation and command chaining/sequencing, so you have full and easy control of the sequence messages should follow and wait until their consumers are done take.
+EzMsg is interface-based, so it allows you to send messages and requests to methods defined in any interface implementing IEventSystemHandler. It supports fluid notation and command chaining/sequencing, so you have full and easy control of the exact sequence the messages should follow, and wait until their consumers are done.
 
 ## Why shouldn't I use another Messaging system? 
 
