@@ -116,6 +116,14 @@ By default both Send and Request instructions are sent to the target game object
 ## Are messages sent to inactive GameObjects in a hierarchy?
 
 No, neither Send nor Requests are sent to inactive objects. There’s no parameter to override that, and I would advise against it, but if you really want it just search for “Include Inactive” in EzMsg.cs to change that behaviour.
+
+## How can I fire a "message method" within the same class?
+
+You can either use a send to the "host" gameObject (the gameObject which contains this component instance), like so:
+		```gameObject.Send<IWeapon>(_=>_.Fire());```
+
+or, which is obviously preferrable for performance reasons (and the good old "KISS" phylosophy), cast the 'this' keyword to the interface in question, like this:
+		```(this as IWeapon).Fire();```
 	
 ## How can I sequence messages?
 
