@@ -16,7 +16,11 @@ public static class EzMsg  {
         get
         {
             if (_manager == null)
+#if UNITY_5 
                 _manager = Object.FindObjectOfType<EzMsgManager>();
+#else
+                _manager = Object.FindFirstObjectByType<EzMsgManager>();
+#endif
             if (_manager == null)
             {
                 var newGO = new GameObject() {name = "_EzMsgManager"};
